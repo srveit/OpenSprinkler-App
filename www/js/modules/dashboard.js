@@ -1309,10 +1309,20 @@ OSApp.Dashboard.displayPage = function() {
 				label.addClass( "hidden" );
 			}
 		},
+		// Home station cards are the run/stop/manual controls. Portrait tablets
+		// with at most 12 zones get a class so those cards can be enlarged.
+		markFewStations = function() {
+			var stations = OSApp.currentSession.controller && OSApp.currentSession.controller.stations,
+				names = stations && stations.snames;
+
+			page.find( "#os-stations-list" ).toggleClass( "few-stations", !!names && names.length <= 12 );
+		},
 		reorderCards = function() {
 			var cardHolder = page.find( "#os-stations-list" ),
 				cardList = cardHolder.children(),
 				compareCards = OSApp.uiState.groupView ? compareCardsGroupView : compareCardsStandardView;
+
+			markFewStations();
 
 			// Sort stations
 			cardList.sort( compareCards ).detach().appendTo( cardHolder );
