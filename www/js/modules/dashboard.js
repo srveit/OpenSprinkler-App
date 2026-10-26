@@ -17,6 +17,61 @@
 var OSApp = OSApp || {};
 OSApp.Dashboard = OSApp.Dashboard || {};
 
+// Fire HD 10 in Fully Kiosk often fails `(orientation: portrait) and (min-width: 600px)`:
+// display scaling can land the CSS width under 600, and the WebView can keep a
+// landscape layout viewport while the panel itself is portrait. Class the
+// document from the viewport, the screen orientation, and Fully's display size.
+OSApp.Dashboard.isTabletPortrait = function() {
+	var fullyApi = window.fully,
+		dpr = window.devicePixelRatio || 1,
+		viewW = window.innerWidth || 0,
+		viewH = window.innerHeight || 0,
+		screenW = ( window.screen && window.screen.width ) || 0,
+		screenH = ( window.screen && window.screen.height ) || 0,
+		displayW = 0,
+		displayH = 0,
+		orientationType = ( window.screen && window.screen.orientation && window.screen.orientation.type ) || "",
+		widths = [],
+		i, shorter;
+
+	if ( fullyApi && typeof fullyApi.getDisplayWidth === "function" && typeof fullyApi.getDisplayHeight === "function" ) {
+		displayW = Number( fullyApi.getDisplayWidth() ) || 0;
+		displayH = Number( fullyApi.getDisplayHeight() ) || 0;
+		if ( dpr > 1 && viewW > 0 && viewH > 0 && displayW > viewW * 1.25 && displayH > viewH * 1.25 ) {
+			displayW = displayW / dpr;
+			displayH = displayH / dpr;
+		}
+	}
+
+	// Portrait width in the tablet band. Phones stay under 480 CSS px.
+	if ( viewW >= 480 && viewH >= viewW ) {
+		widths.push( viewW );
+	}
+	if ( screenW >= 480 && screenH > screenW ) {
+		widths.push( screenW );
+	}
+	if ( displayW >= 480 && displayH > displayW ) {
+		widths.push( displayW );
+	}
+	if ( /^portrait/i.test( orientationType ) ) {
+		shorter = Math.min( screenW || viewW || displayW, screenH || viewH || displayH );
+		if ( shorter >= 480 ) {
+			widths.push( shorter );
+		}
+	}
+
+	for ( i = 0; i < widths.length; i++ ) {
+		if ( widths[ i ] <= 1280 ) {
+			return true;
+		}
+	}
+	return false;
+};
+
+OSApp.Dashboard.markTabletPortrait = function() {
+	document.documentElement.classList.toggle( "tablet-portrait", OSApp.Dashboard.isTabletPortrait() );
+};
+
 OSApp.Dashboard.displayPage = function() {
 	// Display the home dasbhoard main view
 	var cards, siteSelect, currentSite, i, sites;
@@ -1315,6 +1370,7 @@ OSApp.Dashboard.displayPage = function() {
 			var stations = OSApp.currentSession.controller && OSApp.currentSession.controller.stations,
 				names = stations && stations.snames;
 
+			OSApp.Dashboard.markTabletPortrait();
 			page.find( "#os-stations-list" ).toggleClass( "few-stations", !!names && names.length <= 12 );
 		},
 		reorderCards = function() {
@@ -1529,6 +1585,12 @@ OSApp.Dashboard.displayPage = function() {
 		if ( !OSApp.currentSession.isControllerConnected() ) {
 			return false;
 		}
+
+		$( window ).off( ".tabletPortrait" ).on( "resize.tabletPortrait orientationchange.tabletPortrait", function() {
+			OSApp.Dashboard.markTabletPortrait();
+			markFewStations();
+		} );
+		OSApp.Dashboard.markTabletPortrait();
 
 		cards = "";
 		siteSelect = $( "#site-selector" );
