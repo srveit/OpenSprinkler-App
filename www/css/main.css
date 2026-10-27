@@ -1096,28 +1096,25 @@ input[type=number] {
 	padding-top: 8px;
 }
 
-/* Tablets in either orientation. html.tablet-large is set in dashboard.js
-   (Fully, a Fire/Silk user agent, a coarse pointer with short side >= 600px,
-   or a fine pointer inside the Fire CSS viewport). Station count does not
-   matter. .btn-no-border's 25px height and jQuery Mobile's 1.75em icon
-   buttons stay in effect without the class. */
-html.tablet-large #os-stations-list .card > .ui-body {
+/* Zone run/settings controls. The ID beats .btn-no-border's 25px height and
+   jQuery Mobile's 1.75em icon buttons. */
+#os-stations-list .card > .ui-body {
 		min-height: 52px;
 		padding-top: 12px;
 		padding-bottom: 12px;
 	}
-html.tablet-large #os-stations-list .station-name {
+#os-stations-list .station-name {
 		width: 62%;
 		font-size: 1.3em;
 		line-height: 1.3;
 	}
-html.tablet-large #os-stations-list .rem,
-html.tablet-large #os-stations-list .cycle-status {
+#os-stations-list .rem,
+#os-stations-list .cycle-status {
 		width: 68%;
 		font-size: 0.95em !important;
 	}
-html.tablet-large #os-stations-list .station-status,
-html.tablet-large #os-stations-list .station-settings {
+#os-stations-list .station-status,
+#os-stations-list .station-settings {
 		top: 50%;
 		bottom: auto;
 		width: 44px;
@@ -1126,15 +1123,15 @@ html.tablet-large #os-stations-list .station-settings {
 		min-height: 44px;
 		margin-top: -22px;
 	}
-html.tablet-large #os-stations-list .station-status {
+#os-stations-list .station-status {
 		left: 2%;
 	}
-html.tablet-large #os-stations-list .station-settings {
+#os-stations-list .station-settings {
 		right: 2%;
 	}
-html.tablet-large #os-stations-list .station-status:after,
-html.tablet-large #os-stations-list .ui-icon-gear.station-settings:after,
-html.tablet-large #os-stations-list .ui-icon-master.station-settings:after {
+#os-stations-list .station-status:after,
+#os-stations-list .ui-icon-gear.station-settings:after,
+#os-stations-list .ui-icon-master.station-settings:after {
 		width: 34px;
 		height: 34px;
 		margin-top: -17px;
@@ -1142,41 +1139,41 @@ html.tablet-large #os-stations-list .ui-icon-master.station-settings:after {
 		background-size: 22px 22px;
 		border-radius: 1em;
 	}
-html.tablet-large #os-stations-list .station-group-settings:after {
+#os-stations-list .station-group-settings:after {
 		width: 34px;
 		height: 34px;
 		margin-top: -17px;
 		margin-left: -17px;
 	}
-html.tablet-large #os-stations-list .station-group-settings .station-gid {
+#os-stations-list .station-group-settings .station-gid {
 		width: 34px;
 		height: 34px;
 		margin: -17px 0 0 -17px;
 		font-size: 16px;
 		line-height: 34px;
 	}
-html.tablet-large #os-stations-list .station-group-settings.station-cycle:after {
+#os-stations-list .station-group-settings.station-cycle:after {
 		width: 36px;
 		height: 36px;
 		margin-top: -18px;
 		margin-left: -18px;
 		background-size: 36px 36px;
 	}
-html.tablet-large #os-stations-list .special-station {
+#os-stations-list .special-station {
 		margin-right: 52px;
 	}
-html.tablet-large #sprinklers.has-images #os-stations-list .card img {
+#sprinklers.has-images #os-stations-list .card img {
 		width: 72px;
 		height: 72px;
 	}
-html.tablet-large #sprinklers.has-images #os-stations-list .station-name {
+#sprinklers.has-images #os-stations-list .station-name {
 		width: 48%;
 	}
-html.tablet-large #sprinklers.has-images #os-stations-list .station-settings {
+#sprinklers.has-images #os-stations-list .station-settings {
 		top: 6px;
 		margin-top: 0;
 	}
-html.tablet-large #sprinklers.has-images #os-stations-list .station-status {
+#sprinklers.has-images #os-stations-list .station-status {
 		top: auto;
 		right: 2%;
 		bottom: 6px;
@@ -1184,58 +1181,48 @@ html.tablet-large #sprinklers.has-images #os-stations-list .station-status {
 		margin-top: 0;
 	}
 
-/* Zone dialogs on the same tablet: manual run, stop confirm, station settings,
-   and the bundle note opened from a station card. #durationBox's 350px
-   max-width is an inline style, so it has to be overridden here. */
-html.tablet-large #durationBox,
-html.tablet-large #sure,
-html.tablet-large #stn_attrib,
-html.tablet-large #bundle-active-info {
+/* Manual run, stop confirm, station settings, and the bundle note.
+   width/max-width are !important so they beat #durationBox's inline 350px
+   max-width and the narrower #sure / #stn_attrib rules. */
+#durationBox,
+#sure,
+#stn_attrib,
+#bundle-active-info {
 		box-sizing: border-box;
-		width: 480px;
-		min-width: 480px;
-		max-width: calc(100vw - 32px);
+		width: 480px !important;
+		max-width: calc(100vw - 20px) !important;
 		font-size: 20px;
 	}
-html.tablet-large #durationBox {
-		max-width: min(520px, calc(100vw - 32px)) !important;
-	}
-html.tablet-large #durationBox .ui-btn,
-html.tablet-large #sure .ui-btn,
-html.tablet-large #stn_attrib .ui-btn,
-html.tablet-large #bundle-active-info .ui-btn,
-html.tablet-large #durationBox input,
-html.tablet-large #sure input,
-html.tablet-large #stn_attrib input,
-html.tablet-large #stn_attrib textarea,
-html.tablet-large #stn_attrib .ui-select .ui-btn {
-		font-size: 18px;
+#durationBox .ui-btn,
+#sure .ui-btn,
+#stn_attrib .ui-btn,
+#bundle-active-info .ui-btn,
+#durationBox input,
+#sure input,
+#stn_attrib input,
+#stn_attrib textarea,
+#stn_attrib .ui-select .ui-btn {
+		font-size: 20px;
 		min-height: 44px;
 	}
-html.tablet-large #durationBox .duration-title,
-html.tablet-large #sure h3,
-html.tablet-large #bundle-active-info h3,
-html.tablet-large #stn_attrib .ui-bar {
+#durationBox .duration-title,
+#sure h3,
+#bundle-active-info h3,
+#stn_attrib .ui-bar {
 		font-size: 22px;
 	}
-html.tablet-large #stn_attrib label[for="cycle-minutes"],
-html.tablet-large #stn_attrib label[for="soak-minutes"] {
-		font-size: 16px;
+#stn_attrib label[for="cycle-minutes"],
+#stn_attrib label[for="soak-minutes"] {
+		font-size: 20px;
 	}
-#os-tablet-diag {
+body::after {
+	content: "ui fs5";
 	position: fixed;
-	z-index: 100000;
-	left: 4px;
+	z-index: 100001;
+	left: 6px;
 	bottom: 4px;
-	max-width: calc(100vw - 16px);
-	box-sizing: border-box;
-	padding: 6px 8px;
-	background: rgba(0, 0, 0, 0.85);
-	color: #fff;
-	font: 12px/1.35 monospace, sans-serif;
-	text-align: left;
-	white-space: pre-wrap;
-	word-break: break-all;
+	color: rgba(255, 255, 255, 0.4);
+	font: 11px/1 sans-serif;
 	pointer-events: none;
 }
 #footer-running.ui-bar {
