@@ -1096,27 +1096,27 @@ input[type=number] {
 	padding-top: 8px;
 }
 
-/* Portrait tablets with at most 12 zones. html.tablet-portrait is set in
-   dashboard.js because Fully Kiosk on a Fire HD 10 can miss
-   (orientation: portrait) and (min-width: 600px). .btn-no-border's 25px
-   height and jQuery Mobile's 1.75em icon buttons stay in effect without it. */
-html.tablet-portrait #os-stations-list.few-stations .card > .ui-body {
+/* Tablets (portrait and landscape) with at most 12 zones. html.tablet-large
+   is set in dashboard.js from the CSS viewport (short side >= ~600px, long
+   side short of a desktop window) or Fully's display size. .btn-no-border's
+   25px height and jQuery Mobile's 1.75em icon buttons stay in effect without it. */
+html.tablet-large #os-stations-list.few-stations .card > .ui-body {
 		min-height: 52px;
 		padding-top: 12px;
 		padding-bottom: 12px;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-name {
+html.tablet-large #os-stations-list.few-stations .station-name {
 		width: 62%;
 		font-size: 1.3em;
 		line-height: 1.3;
 	}
-html.tablet-portrait #os-stations-list.few-stations .rem,
-html.tablet-portrait #os-stations-list.few-stations .cycle-status {
+html.tablet-large #os-stations-list.few-stations .rem,
+html.tablet-large #os-stations-list.few-stations .cycle-status {
 		width: 68%;
 		font-size: 0.95em !important;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-status,
-html.tablet-portrait #os-stations-list.few-stations .station-settings {
+html.tablet-large #os-stations-list.few-stations .station-status,
+html.tablet-large #os-stations-list.few-stations .station-settings {
 		top: 50%;
 		bottom: auto;
 		width: 44px;
@@ -1125,15 +1125,15 @@ html.tablet-portrait #os-stations-list.few-stations .station-settings {
 		min-height: 44px;
 		margin-top: -22px;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-status {
+html.tablet-large #os-stations-list.few-stations .station-status {
 		left: 2%;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-settings {
+html.tablet-large #os-stations-list.few-stations .station-settings {
 		right: 2%;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-status:after,
-html.tablet-portrait #os-stations-list.few-stations .ui-icon-gear.station-settings:after,
-html.tablet-portrait #os-stations-list.few-stations .ui-icon-master.station-settings:after {
+html.tablet-large #os-stations-list.few-stations .station-status:after,
+html.tablet-large #os-stations-list.few-stations .ui-icon-gear.station-settings:after,
+html.tablet-large #os-stations-list.few-stations .ui-icon-master.station-settings:after {
 		width: 34px;
 		height: 34px;
 		margin-top: -17px;
@@ -1141,46 +1141,85 @@ html.tablet-portrait #os-stations-list.few-stations .ui-icon-master.station-sett
 		background-size: 22px 22px;
 		border-radius: 1em;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-group-settings:after {
+html.tablet-large #os-stations-list.few-stations .station-group-settings:after {
 		width: 34px;
 		height: 34px;
 		margin-top: -17px;
 		margin-left: -17px;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-group-settings .station-gid {
+html.tablet-large #os-stations-list.few-stations .station-group-settings .station-gid {
 		width: 34px;
 		height: 34px;
 		margin: -17px 0 0 -17px;
 		font-size: 16px;
 		line-height: 34px;
 	}
-html.tablet-portrait #os-stations-list.few-stations .station-group-settings.station-cycle:after {
+html.tablet-large #os-stations-list.few-stations .station-group-settings.station-cycle:after {
 		width: 36px;
 		height: 36px;
 		margin-top: -18px;
 		margin-left: -18px;
 		background-size: 36px 36px;
 	}
-html.tablet-portrait #os-stations-list.few-stations .special-station {
+html.tablet-large #os-stations-list.few-stations .special-station {
 		margin-right: 52px;
 	}
-html.tablet-portrait #sprinklers.has-images #os-stations-list.few-stations .card img {
+html.tablet-large #sprinklers.has-images #os-stations-list.few-stations .card img {
 		width: 72px;
 		height: 72px;
 	}
-html.tablet-portrait #sprinklers.has-images #os-stations-list.few-stations .station-name {
+html.tablet-large #sprinklers.has-images #os-stations-list.few-stations .station-name {
 		width: 48%;
 	}
-html.tablet-portrait #sprinklers.has-images #os-stations-list.few-stations .station-settings {
+html.tablet-large #sprinklers.has-images #os-stations-list.few-stations .station-settings {
 		top: 6px;
 		margin-top: 0;
 	}
-html.tablet-portrait #sprinklers.has-images #os-stations-list.few-stations .station-status {
+html.tablet-large #sprinklers.has-images #os-stations-list.few-stations .station-status {
 		top: auto;
 		right: 2%;
 		bottom: 6px;
 		left: auto;
 		margin-top: 0;
+	}
+
+/* Zone dialogs on the same tablet: manual run, stop confirm, station settings,
+   and the bundle note opened from a station card. #durationBox's 350px
+   max-width is an inline style, so it has to be overridden here. */
+html.tablet-large #durationBox,
+html.tablet-large #sure,
+html.tablet-large #stn_attrib,
+html.tablet-large #bundle-active-info {
+		box-sizing: border-box;
+		width: 480px;
+		min-width: 480px;
+		max-width: calc(100vw - 32px);
+		font-size: 20px;
+	}
+html.tablet-large #durationBox {
+		max-width: min(520px, calc(100vw - 32px)) !important;
+	}
+html.tablet-large #durationBox .ui-btn,
+html.tablet-large #sure .ui-btn,
+html.tablet-large #stn_attrib .ui-btn,
+html.tablet-large #bundle-active-info .ui-btn,
+html.tablet-large #durationBox input,
+html.tablet-large #sure input,
+html.tablet-large #stn_attrib input,
+html.tablet-large #stn_attrib textarea,
+html.tablet-large #stn_attrib .ui-select .ui-btn {
+		font-size: 18px;
+		min-height: 44px;
+	}
+html.tablet-large #durationBox .duration-title,
+html.tablet-large #sure h3,
+html.tablet-large #bundle-active-info h3,
+html.tablet-large #stn_attrib .ui-bar {
+		font-size: 22px;
+	}
+html.tablet-large #stn_attrib label[for="cycle-minutes"],
+html.tablet-large #stn_attrib label[for="soak-minutes"] {
+		font-size: 16px;
 	}
 #footer-running.ui-bar {
     font-weight: 600;

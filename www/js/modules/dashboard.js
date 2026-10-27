@@ -17,11 +17,11 @@
 var OSApp = OSApp || {};
 OSApp.Dashboard = OSApp.Dashboard || {};
 
-// Fire HD 10 in Fully Kiosk often fails `(orientation: portrait) and (min-width: 600px)`:
-// display scaling can land the CSS width under 600, and the WebView can keep a
-// landscape layout viewport while the panel itself is portrait. Class the
-// document from the viewport, the screen orientation, and Fully's display size.
-OSApp.Dashboard.isTabletPortrait = function() {
+// Fire HD 10 in Fully Kiosk is about 680x1024 CSS px portrait and 1024x680
+// landscape (physical panel 1200x1920). Enlarge in both orientations when the
+// short side is at least ~600px and the long side stays under a desktop window
+// such as 1280x800. Fully's display size counts too, including physical pixels.
+OSApp.Dashboard.isTabletLarge = function() {
 	var fullyApi = window.fully,
 		dpr = window.devicePixelRatio || 1,
 		viewW = window.innerWidth || 0,
@@ -30,46 +30,61 @@ OSApp.Dashboard.isTabletPortrait = function() {
 		screenH = ( window.screen && window.screen.height ) || 0,
 		displayW = 0,
 		displayH = 0,
-		orientationType = ( window.screen && window.screen.orientation && window.screen.orientation.type ) || "",
-		widths = [],
-		i, shorter;
+		viewShorter = viewW > 0 && viewH > 0 ? Math.min( viewW, viewH ) : 0,
+		viewLonger = viewW > 0 && viewH > 0 ? Math.max( viewW, viewH ) : 0;
+
+	function isCssTablet( w, h ) {
+		var shorter, longer;
+
+		if ( !( w > 0 && h > 0 ) ) {
+			return false;
+		}
+		shorter = Math.min( w, h );
+		longer = Math.max( w, h );
+
+		// 1280x800 is a desktop window: its short side is over 600, so cap the long side.
+		return shorter >= 600 && longer <= 1200;
+	}
+
+	function isFirePanel( w, h ) {
+		var shorter, longer;
+
+		if ( !( w > 0 && h > 0 ) ) {
+			return false;
+		}
+		shorter = Math.min( w, h );
+		longer = Math.max( w, h );
+
+		// Fully getDisplayWidth/Height is often the physical 1200x1920 panel.
+		return shorter >= 1100 && shorter <= 1400 && longer >= 1700 && longer <= 2100;
+	}
+
+	function matchesTablet( w, h ) {
+		return isCssTablet( w, h ) || isFirePanel( w, h ) || ( dpr > 1 && isCssTablet( w / dpr, h / dpr ) );
+	}
+
+	if ( isCssTablet( viewW, viewH ) ) {
+		return true;
+	}
 
 	if ( fullyApi && typeof fullyApi.getDisplayWidth === "function" && typeof fullyApi.getDisplayHeight === "function" ) {
 		displayW = Number( fullyApi.getDisplayWidth() ) || 0;
 		displayH = Number( fullyApi.getDisplayHeight() ) || 0;
-		if ( dpr > 1 && viewW > 0 && viewH > 0 && displayW > viewW * 1.25 && displayH > viewH * 1.25 ) {
-			displayW = displayW / dpr;
-			displayH = displayH / dpr;
-		}
-	}
-
-	// Portrait width in the tablet band. Phones stay under 480 CSS px.
-	if ( viewW >= 480 && viewH >= viewW ) {
-		widths.push( viewW );
-	}
-	if ( screenW >= 480 && screenH > screenW ) {
-		widths.push( screenW );
-	}
-	if ( displayW >= 480 && displayH > displayW ) {
-		widths.push( displayW );
-	}
-	if ( /^portrait/i.test( orientationType ) ) {
-		shorter = Math.min( screenW || viewW || displayW, screenH || viewH || displayH );
-		if ( shorter >= 480 ) {
-			widths.push( shorter );
-		}
-	}
-
-	for ( i = 0; i < widths.length; i++ ) {
-		if ( widths[ i ] <= 1280 ) {
+		if ( matchesTablet( displayW, displayH ) ) {
 			return true;
 		}
 	}
-	return false;
+
+	// A phone or desktop window stays small even when the monitor is tablet-sized.
+	if ( viewShorter > 0 && ( viewShorter < 560 || viewLonger > 1200 ) ) {
+		return false;
+	}
+
+	return matchesTablet( screenW, screenH );
 };
 
-OSApp.Dashboard.markTabletPortrait = function() {
-	document.documentElement.classList.toggle( "tablet-portrait", OSApp.Dashboard.isTabletPortrait() );
+OSApp.Dashboard.markTabletLarge = function() {
+	document.documentElement.classList.toggle( "tablet-large", OSApp.Dashboard.isTabletLarge() );
 };
 
 OSApp.Dashboard.displayPage = function() {
@@ -1364,13 +1379,13 @@ OSApp.Dashboard.displayPage = function() {
 				label.addClass( "hidden" );
 			}
 		},
-		// Home station cards are the run/stop/manual controls. Portrait tablets
+		// Home station cards are the run/stop/manual controls. Tablets
 		// with at most 12 zones get a class so those cards can be enlarged.
 		markFewStations = function() {
 			var stations = OSApp.currentSession.controller && OSApp.currentSession.controller.stations,
 				names = stations && stations.snames;
 
-			OSApp.Dashboard.markTabletPortrait();
+			OSApp.Dashboard.markTabletLarge();
 			page.find( "#os-stations-list" ).toggleClass( "few-stations", !!names && names.length <= 12 );
 		},
 		reorderCards = function() {
@@ -1586,11 +1601,11 @@ OSApp.Dashboard.displayPage = function() {
 			return false;
 		}
 
-		$( window ).off( ".tabletPortrait" ).on( "resize.tabletPortrait orientationchange.tabletPortrait", function() {
-			OSApp.Dashboard.markTabletPortrait();
+		$( window ).off( ".tabletLarge" ).on( "resize.tabletLarge orientationchange.tabletLarge", function() {
+			OSApp.Dashboard.markTabletLarge();
 			markFewStations();
 		} );
-		OSApp.Dashboard.markTabletPortrait();
+		OSApp.Dashboard.markTabletLarge();
 
 		cards = "";
 		siteSelect = $( "#site-selector" );
