@@ -1216,7 +1216,7 @@ input[type=number] {
 		font-size: 20px;
 	}
 body::after {
-	content: "ui fs5";
+	content: "ui fs6";
 	position: fixed;
 	z-index: 100001;
 	left: 6px;
@@ -1224,6 +1224,54 @@ body::after {
 	color: rgba(255, 255, 255, 0.4);
 	font: 11px/1 sans-serif;
 	pointer-events: none;
+}
+
+/* Persistent title bar, doubled from the measured jQuery Mobile sizes
+   (46px bar, 16px title, 28px icon buttons, 22px glyphs). */
+#header.ui-header {
+	box-sizing: border-box;
+	min-height: 92px;
+}
+#header .ui-title {
+	margin-left: 72px;
+	margin-right: 72px;
+	font-size: 32px;
+	line-height: 1.15;
+}
+#header .logo {
+	height: 84px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	background-size: 318px 80px;
+}
+#header .ui-btn {
+	font-size: 25px;
+	min-height: 56px;
+}
+#header .ui-btn-icon-notext {
+	width: 56px;
+	height: 56px;
+	min-width: 56px;
+	min-height: 56px;
+}
+#header .ui-btn-left,
+#header .ui-btn-right {
+	top: 50%;
+	margin-top: 0;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+#header .ui-btn:after {
+	width: 44px;
+	height: 44px;
+	margin-top: -22px;
+	background-size: 28px 28px;
+}
+#header .ui-btn-icon-notext:after {
+	margin-left: -22px;
+}
+.ui-page-header-fixed {
+	padding-top: 92px;
 }
 #footer-running.ui-bar {
     font-weight: 600;
