@@ -18,20 +18,20 @@ var OSApp = OSApp || {};
 OSApp.Dashboard = OSApp.Dashboard || {};
 
 // Fire HD 10 in Fully Kiosk is about 680x1024 CSS px portrait and 1024x680
-// landscape (physical panel 1200x1920). Enlarge in both orientations when the
-// short side is at least ~600px and the long side stays under a desktop window
-// such as 1280x800. Fully's display size counts too, including physical pixels.
+// landscape (physical 1200x1920, DPR ~1.76). A fine pointer keeps the long-side
+// cap so a 1280x800 desktop stays small. Fully, a Fire/Silk user agent, or a
+// coarse pointer whose short side is at least 600px (no long-side cap) also match.
 OSApp.Dashboard.isTabletLarge = function() {
 	var fullyApi = window.fully,
+		ua = navigator.userAgent || "",
 		dpr = window.devicePixelRatio || 1,
 		viewW = window.innerWidth || 0,
 		viewH = window.innerHeight || 0,
 		screenW = ( window.screen && window.screen.width ) || 0,
 		screenH = ( window.screen && window.screen.height ) || 0,
-		displayW = 0,
-		displayH = 0,
 		viewShorter = viewW > 0 && viewH > 0 ? Math.min( viewW, viewH ) : 0,
-		viewLonger = viewW > 0 && viewH > 0 ? Math.max( viewW, viewH ) : 0;
+		viewLonger = viewW > 0 && viewH > 0 ? Math.max( viewW, viewH ) : 0,
+		coarse = false;
 
 	function isCssTablet( w, h ) {
 		var shorter, longer;
@@ -63,20 +63,42 @@ OSApp.Dashboard.isTabletLarge = function() {
 		return isCssTablet( w, h ) || isFirePanel( w, h ) || ( dpr > 1 && isCssTablet( w / dpr, h / dpr ) );
 	}
 
+	function pointerMatches( query ) {
+		return !!( window.matchMedia && window.matchMedia( query ).matches );
+	}
+
+	// "Fire" is also the start of "Firefox". A fine-pointer Firefox window stays desktop.
+	function isFireUserAgent() {
+		if ( /Silk|KF[A-Z]{2,}/.test( ua ) ) {
+			return true;
+		}
+		return /Fire/.test( ua ) && !/Firefox/.test( ua );
+	}
+
+	if ( fullyApi ) {
+		return true;
+	}
+
+	if ( isFireUserAgent() ) {
+		return true;
+	}
+
+	coarse = pointerMatches( "(pointer: coarse)" );
+
+	if ( coarse && viewShorter >= 600 ) {
+		return true;
+	}
+
 	if ( isCssTablet( viewW, viewH ) ) {
 		return true;
 	}
 
-	if ( fullyApi && typeof fullyApi.getDisplayWidth === "function" && typeof fullyApi.getDisplayHeight === "function" ) {
-		displayW = Number( fullyApi.getDisplayWidth() ) || 0;
-		displayH = Number( fullyApi.getDisplayHeight() ) || 0;
-		if ( matchesTablet( displayW, displayH ) ) {
-			return true;
-		}
+	// Phones stay small. Without a coarse pointer, a long side past a desktop
+	// window (1280x800) stays small even when the monitor itself is tablet-sized.
+	if ( viewShorter > 0 && viewShorter < 600 ) {
+		return false;
 	}
-
-	// A phone or desktop window stays small even when the monitor is tablet-sized.
-	if ( viewShorter > 0 && ( viewShorter < 560 || viewLonger > 1200 ) ) {
+	if ( !coarse && viewLonger > 1200 ) {
 		return false;
 	}
 
@@ -85,6 +107,40 @@ OSApp.Dashboard.isTabletLarge = function() {
 
 OSApp.Dashboard.markTabletLarge = function() {
 	document.documentElement.classList.toggle( "tablet-large", OSApp.Dashboard.isTabletLarge() );
+	OSApp.Dashboard.updateTabletDiag();
+};
+
+// Opt-in layout readout: open the app with ?diag=1.
+OSApp.Dashboard.updateTabletDiag = function() {
+	var enabled = /(?:^|[?&])diag=1(?:&|$)/.test( window.location.search || "" ),
+		box = document.getElementById( "os-tablet-diag" ),
+		session = OSApp.currentSession,
+		stations = session && session.controller && session.controller.stations,
+		names = stations && stations.snames,
+		parent;
+
+	if ( !enabled ) {
+		if ( box && box.parentNode ) {
+			box.parentNode.removeChild( box );
+		}
+		return;
+	}
+
+	if ( !box ) {
+		box = document.createElement( "div" );
+		box.id = "os-tablet-diag";
+		parent = document.body || document.documentElement;
+		parent.appendChild( box );
+	}
+
+	box.textContent = [
+		( window.innerWidth || 0 ) + " x " + ( window.innerHeight || 0 ),
+		"dpr " + ( window.devicePixelRatio || 1 ),
+		navigator.userAgent || "",
+		"fully " + ( window.fully ? "yes" : "no" ),
+		"tablet-large " + ( document.documentElement.classList.contains( "tablet-large" ) ? "on" : "off" ),
+		"snames " + ( names ? names.length : "n/a" )
+	].join( "\n" );
 };
 
 OSApp.Dashboard.displayPage = function() {
@@ -1379,21 +1435,12 @@ OSApp.Dashboard.displayPage = function() {
 				label.addClass( "hidden" );
 			}
 		},
-		// Home station cards are the run/stop/manual controls. Tablets
-		// with at most 12 zones get a class so those cards can be enlarged.
-		markFewStations = function() {
-			var stations = OSApp.currentSession.controller && OSApp.currentSession.controller.stations,
-				names = stations && stations.snames;
-
-			OSApp.Dashboard.markTabletLarge();
-			page.find( "#os-stations-list" ).toggleClass( "few-stations", !!names && names.length <= 12 );
-		},
 		reorderCards = function() {
 			var cardHolder = page.find( "#os-stations-list" ),
 				cardList = cardHolder.children(),
 				compareCards = OSApp.uiState.groupView ? compareCardsGroupView : compareCardsStandardView;
 
-			markFewStations();
+			OSApp.Dashboard.markTabletLarge();
 
 			// Sort stations
 			cardList.sort( compareCards ).detach().appendTo( cardHolder );
@@ -1597,15 +1644,14 @@ OSApp.Dashboard.displayPage = function() {
 	} );
 
 	function begin( firstLoad ) {
+		$( window ).off( ".tabletLarge" ).on( "resize.tabletLarge orientationchange.tabletLarge", function() {
+			OSApp.Dashboard.markTabletLarge();
+		} );
+		OSApp.Dashboard.markTabletLarge();
+
 		if ( !OSApp.currentSession.isControllerConnected() ) {
 			return false;
 		}
-
-		$( window ).off( ".tabletLarge" ).on( "resize.tabletLarge orientationchange.tabletLarge", function() {
-			OSApp.Dashboard.markTabletLarge();
-			markFewStations();
-		} );
-		OSApp.Dashboard.markTabletLarge();
 
 		cards = "";
 		siteSelect = $( "#site-selector" );

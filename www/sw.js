@@ -16,7 +16,7 @@
 // Define a name for the current cache
 var cachePrefix = "OpenSprinkler-";
 // Release workflows replace the literal version in this value.
-var cacheName = "OpenSprinkler-v2.4.112-fewstations3";
+var cacheName = "OpenSprinkler-v2.4.112-fewstations4";
 
 // Html
 var cacheFiles = [
